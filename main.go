@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+//comite Test
 var (
 	dispositivo     string = "ens33"
 	longitudCaptura int32  = 1024
