@@ -10,11 +10,10 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-//comite Test
 var (
-	dispositivo     string = "ens33"
+	dispositivo     string = "enp3s0"
 	longitudCaptura int32  = 1024
-	modoPromiscuo   bool   = true
+	modoPromiscuo   bool   = false
 	err             error
 	tiempoSalida    time.Duration = 2 * time.Second
 	handle          *pcap.Handle
@@ -35,18 +34,17 @@ func Echo(ws *websocket.Conn) {
 		var reply string
 
 		if err = websocket.Message.Receive(ws, &reply); err != nil {
-			fmt.Println("Mensaje estado OK")
+			fmt.Println("Mensaje estado OK ",)
 			break
 		}
 
 		fmt.Println("Mensaje del cliente " + reply)
 
 		fmt.Println(reply)
+		websocket.Message.Send(ws, reply)
 
 		//Envio de packageNet
-		if err = packageNet(ws); err != nil {
-			break
-		}
+		packageNet(ws)
 
 		// err = websocket.Message.Send(ws, reply)
 		// err = websocket.Message.Send(ws, reply)
@@ -57,11 +55,6 @@ func Echo(ws *websocket.Conn) {
 		// }
 
 	}
-}
-
-type Test struct {
-	User    string `json:"user"`
-	Mensaje string `json:"mensaje"`
 }
 
 func packageNet(ws *websocket.Conn) error {
@@ -77,16 +70,16 @@ func packageNet(ws *websocket.Conn) error {
 	//Utiliza handle para procesar todos los paquetes
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		time.Sleep(time.Second * 1)
 		fmt.Println(packet)
-		data := &Test{
-			User:    "luis",
-			Mensaje: "hola como estas"}
-		websocket.JSON.Send(ws, data)
+		data := fmt.Sprint(packet)
+		websocket.Message.Send(ws, data)	//enviamos los datos
 	}
 	return nil
 }
 
-func infoPaquete(paquete gopacket.Packet) {
 
-}
+
+
+
+
+
