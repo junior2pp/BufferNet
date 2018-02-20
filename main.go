@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"golang.org/x/net/websocket"
 )
@@ -67,16 +68,9 @@ func Echo(ws *websocket.Conn) {
 		websocket.Message.Send(ws, reply)
 
 		//Envio de packageNet
-		packageNet(ws)
-
-		// err = websocket.Message.Send(ws, reply)
-		// err = websocket.Message.Send(ws, reply)
-		// fmt.Println(err)
-		// if err != nil {
-		// 	fmt.Println("Can't send")
-		// 	break
-		// }
-
+		if err := packageNet(ws); err != nil {
+			break
+		}
 	}
 	return
 }
@@ -94,9 +88,26 @@ func packageNet(ws *websocket.Conn) error {
 	//Utiliza handle para procesar todos los paquetes
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		fmt.Println(packet)
+		//fmt.Println(packet)
+		SendPacket(packet)
 		data := fmt.Sprint(packet)
 		websocket.Message.Send(ws, data) //enviamos los datos
 	}
 	return nil
+}
+
+//SendPacket Envia los packete selecionado
+func SendPacket(packet gopacket.Packet) {
+	// packet de ethernet
+	ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
+	if ethernetLayer != nil {
+		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet)
+
+		ethernet := layers.Ethernet{
+			SrcMAC: ethernetPacket.SrcMAC,
+			DstMAC: ethernetPacket.DstMAC,
+		}
+
+		fmt.Println("packet de ethernet: ", ethernet)
+	}
 }
