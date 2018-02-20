@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 	"golang.org/x/net/websocket"
@@ -21,10 +24,30 @@ var (
 
 func main() {
 	fmt.Println("localhost:8000")
-	r := http.NewServeMux()
-	r.Handle("/", websocket.Handler(Echo))
+	r := chi.NewRouter()
+
+	// /api/packet
+	//api para eviar los packet
+	r.Route("/api", func(r chi.Router) {
+		r.Handle("/packet", websocket.Handler(Echo))
+	})
+
+	r.Get("/", Inicio) //Enviar el html and js
 	http.ListenAndServe(":8000", r)
 
+}
+
+//Pagina inicial
+func Inicio(w http.ResponseWriter, r *http.Request) {
+
+	t, err := template.ParseFiles("./view/index.html")
+
+	if err != nil {
+		log.Println("Error del Template. ", err)
+	}
+	t.Execute(w, nil)
+
+	return
 }
 
 func Echo(ws *websocket.Conn) {
@@ -34,7 +57,7 @@ func Echo(ws *websocket.Conn) {
 		var reply string
 
 		if err = websocket.Message.Receive(ws, &reply); err != nil {
-			fmt.Println("Mensaje estado OK ",)
+			fmt.Println("Mensaje estado OK ")
 			break
 		}
 
@@ -55,6 +78,7 @@ func Echo(ws *websocket.Conn) {
 		// }
 
 	}
+	return
 }
 
 func packageNet(ws *websocket.Conn) error {
@@ -72,14 +96,7 @@ func packageNet(ws *websocket.Conn) error {
 	for packet := range packetSource.Packets() {
 		fmt.Println(packet)
 		data := fmt.Sprint(packet)
-		websocket.Message.Send(ws, data)	//enviamos los datos
+		websocket.Message.Send(ws, data) //enviamos los datos
 	}
 	return nil
 }
-
-
-
-
-
-
-
