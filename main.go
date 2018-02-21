@@ -112,10 +112,19 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	// Packet UDP
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
-		UDPPacket, _ := UDPLayer.(*layers.UDP)        //Tranformamos
-		fmt.Println("packet de UDP ----", *UDPPacket) //Imprimimos
+		UDPPacket, _ := UDPLayer.(*layers.UDP)         //Tranformamos
+		fmt.Println("packet de UDP >>>> ", *UDPPacket) //Imprimimos
 		data := fmt.Sprint("packet UDP >>>> ", *UDPPacket)
 		websocket.Message.Send(ws, data) //Enviamos por el web socket
+	}
+
+	// Protocol TCP
+	TCPLayer := packet.Layer(layers.LayerTypeTCP)
+	if TCPLayer != nil {
+		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
+		fmt.Println("Packet de TCP >>>> ", *TCPPacket)
+		data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
+		websocket.Message.Send(ws, data)
 	}
 
 }
