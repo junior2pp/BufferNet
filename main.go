@@ -120,10 +120,14 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	// Packet UDP
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
-		UDPPacket, _ := UDPLayer.(*layers.UDP)         //Tranformamos
-		fmt.Println("packet de UDP >>>> ", *UDPPacket) //Imprimimos
-		data := fmt.Sprint("packet UDP >>>> ", *UDPPacket)
-		websocket.Message.Send(ws, data) //Enviamos por el web socket
+		UDPPacket, _ := UDPLayer.(*layers.UDP) //Tranformamos
+
+		//fmt.Println("packet de UDP >>>> ", *UDPPacket) //Imprimimos
+		//data := fmt.Sprint("packet UDP >>>> ", *UDPPacket)
+
+		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
+		fmt.Println("Protocol UDP >>>> ", string(data))
+		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
 	}
 
 	// Protocol TCP
@@ -132,7 +136,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
 		//fmt.Println("Packet de TCP >>>> ", *TCPPacket)
 		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
-		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab)
+		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
 		fmt.Println("Protocol tcp >>>> ", string(data))
 		websocket.Message.Send(ws, string(data))
 	}
