@@ -15,6 +15,11 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+const (
+	NewLine = "\n"
+	Tab     = "\t"
+)
+
 var (
 	dispositivo     string = "enp3s0"
 	longitudCaptura int32  = 1024
@@ -127,7 +132,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
 		//fmt.Println("Packet de TCP >>>> ", *TCPPacket)
 		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
-		data, _ := json.MarshalIndent(*TCPPacket, "\n", "\t")
+		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab)
 		fmt.Println("Protocol tcp >>>> ", string(data))
 		websocket.Message.Send(ws, string(data))
 	}
@@ -136,9 +141,11 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	ipv4Layer := packet.Layer(layers.LayerTypeIPv4)
 	if ipv4Layer != nil {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
-		fmt.Println("Packet de Ipv4 >>>> ", *ipv4Packet)
-		data := fmt.Sprint("Packet de Ipv4 >>>> ", *ipv4Packet)
-		websocket.Message.Send(ws, data)
+		//fmt.Println("Packet de Ipv4 >>>> ", *ipv4Packet)
+		//data := fmt.Sprint("Packet de Ipv4 >>>> ", *ipv4Packet)
+		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
+		fmt.Println("Protocol ipv4 >>>> ", string(data))
+		websocket.Message.Send(ws, string(data))
 	}
 
 }
