@@ -127,9 +127,9 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
 		//fmt.Println("Packet de TCP >>>> ", *TCPPacket)
 		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
-		data, _ := json.Marshal(*TCPPacket)
-		fmt.Println(string(data))
-		websocket.Message.Send(ws, data)
+		data, _ := json.MarshalIndent(*TCPPacket, "\n", "\t")
+		fmt.Println("Protocol tcp >>>> ", string(data))
+		websocket.Message.Send(ws, string(data))
 	}
 
 	// controla en Protocol ip-v4
