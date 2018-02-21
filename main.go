@@ -112,9 +112,12 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	if ethernetLayer != nil {
 		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
 
-		fmt.Println("packet de ethernet >>>> ", *ethernetPacket) //Imprimimos en la consola
-		data := fmt.Sprint("packet ethernet >>>> ", *ethernetPacket)
-		websocket.Message.Send(ws, data) //Enviamos por el web socket
+		//fmt.Println("packet de ethernet >>>> ", *ethernetPacket) //Imprimimos en la consola
+		//data := fmt.Sprint("packet ethernet >>>> ", *ethernetPacket)
+
+		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
+		fmt.Println("Protocol Ethernet >>>> ", string(data))
+		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
 	}
 
 	// Packet UDP
