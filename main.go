@@ -51,6 +51,7 @@ func Inicio(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+//Echo maneja el web socket para enviar todos los packets
 func Echo(ws *websocket.Conn) {
 	var err error
 
@@ -75,6 +76,7 @@ func Echo(ws *websocket.Conn) {
 	return
 }
 
+//packetNet Escanea todos los packets de la red
 func packageNet(ws *websocket.Conn) error {
 
 	// Abrimos la lectura
@@ -96,7 +98,7 @@ func packageNet(ws *websocket.Conn) error {
 	return nil
 }
 
-//SendPacket Envia los packete selecionado
+//SendPacket Seleciona los diferentes packets y los envia por web socket
 func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 	// packet de ethernet
