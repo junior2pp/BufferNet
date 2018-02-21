@@ -89,22 +89,24 @@ func packageNet(ws *websocket.Conn) error {
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
 		//fmt.Println(packet)
-		SendPacket(packet)
-		data := fmt.Sprint(packet)
-		websocket.Message.Send(ws, data) //enviamos los datos
+		SendPacket(packet, ws)
+		//data := fmt.Sprint(packet)
+		//websocket.Message.Send(ws, data) //enviamos los datos
 	}
 	return nil
 }
 
 //SendPacket Envia los packete selecionado
-func SendPacket(packet gopacket.Packet) {
+func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 	// packet de ethernet
 	ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
 	if ethernetLayer != nil {
 		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
 
-		fmt.Println("packet de ethernet >>>>> ", *ethernetPacket) //Imprimimos
+		fmt.Println("packet de ethernet >>>> ", *ethernetPacket) //Imprimimos en la consola
+		data := fmt.Sprint("packet ethernet >>>> ", *ethernetPacket)
+		websocket.Message.Send(ws, data) //Enviamos por el web socket
 	}
 
 	// Packet UDP
@@ -112,6 +114,8 @@ func SendPacket(packet gopacket.Packet) {
 	if UDPLayer != nil {
 		UDPPacket, _ := UDPLayer.(*layers.UDP)        //Tranformamos
 		fmt.Println("packet de UDP ----", *UDPPacket) //Imprimimos
+		data := fmt.Sprint("packet UDP >>>> ", *UDPPacket)
+		websocket.Message.Send(ws, data) //Enviamos por el web socket
 	}
 
 }
