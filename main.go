@@ -98,16 +98,20 @@ func packageNet(ws *websocket.Conn) error {
 
 //SendPacket Envia los packete selecionado
 func SendPacket(packet gopacket.Packet) {
+
 	// packet de ethernet
 	ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
 	if ethernetLayer != nil {
-		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet)
+		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
 
-		ethernet := layers.Ethernet{
-			SrcMAC: ethernetPacket.SrcMAC,
-			DstMAC: ethernetPacket.DstMAC,
-		}
-
-		fmt.Println("packet de ethernet: ", ethernet)
+		fmt.Println("packet de ethernet >>>>> ", *ethernetPacket) //Imprimimos
 	}
+
+	// Packet UDP
+	UDPLayer := packet.Layer(layers.LayerTypeUDP)
+	if UDPLayer != nil {
+		UDPPacket, _ := UDPLayer.(*layers.UDP)        //Tranformamos
+		fmt.Println("packet de UDP ----", *UDPPacket) //Imprimimos
+	}
+
 }
