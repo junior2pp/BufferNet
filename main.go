@@ -129,4 +129,13 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		websocket.Message.Send(ws, data)
 	}
 
+	// controla en Protocol ip-v4
+	ipv4Layer := packet.Layer(layers.LayerTypeIPv4)
+	if ipv4Layer != nil {
+		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
+		fmt.Println("Packet de Ipv4 >>>> ", *ipv4Packet)
+		data := fmt.Sprint("Packet de Ipv4 >>>> ", *ipv4Packet)
+		websocket.Message.Send(ws, data)
+	}
+
 }
