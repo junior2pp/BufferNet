@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -124,8 +125,10 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	TCPLayer := packet.Layer(layers.LayerTypeTCP)
 	if TCPLayer != nil {
 		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
-		fmt.Println("Packet de TCP >>>> ", *TCPPacket)
-		data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
+		//fmt.Println("Packet de TCP >>>> ", *TCPPacket)
+		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
+		data, _ := json.Marshal(*TCPPacket)
+		fmt.Println(string(data))
 		websocket.Message.Send(ws, data)
 	}
 
