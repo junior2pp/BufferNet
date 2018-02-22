@@ -19,7 +19,8 @@
 	</p>
 	</form>
 	<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
-
+	<button type="button" class="btn btn-primary" onclick="stop();">Stop</button>
+	
 	<div id="packet">
 
 	</div>
@@ -58,6 +59,10 @@ function send() {
 	var msg = document.getElementById('message').value;
 	sock.send(msg);
 };
+
+function Stop() {
+	sock.send("stop");
+}
 
 </script>
   </body>

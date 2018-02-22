@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
 	"log"
@@ -30,6 +31,11 @@ var (
 )
 
 func main() {
+	flag.StringVar(&dispositivo, "d", "enp3s0", "Dispositivo que se va a utilizar para escanear.")
+	flag.Parse()
+
+	fmt.Println("Dispositivo: ", dispositivo)
+
 	fmt.Println("localhost:8000")
 	r := chi.NewRouter()
 
@@ -96,10 +102,7 @@ func packageNet(ws *websocket.Conn) error {
 	//Utiliza handle para procesar todos los paquetes
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		//fmt.Println(packet)
 		SendPacket(packet, ws)
-		//data := fmt.Sprint(packet)
-		//websocket.Message.Send(ws, data) //enviamos los datos
 	}
 	return nil
 }
