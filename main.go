@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -36,10 +37,6 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("Dispositivo: ", dispositivo)
-
-	Packets = append(Packets, "Datos--")
-	Packets = append(Packets, 25)
-	fmt.Println(Packets[0])
 
 	fmt.Println("localhost:8000")
 	r := chi.NewRouter()
@@ -159,6 +156,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
 		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
 		fmt.Println("Protocol tcp >>>> ", string(data))
+		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
 		websocket.Message.Send(ws, string(data))
 	}
 
@@ -171,13 +169,21 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
 		fmt.Println("Protocol ipv4 >>>> ", string(data))
+		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
 		websocket.Message.Send(ws, string(data))
 	}
 
 }
 
 func GetPacket(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	fmt.Fprintln(w, id)
+	if id := chi.URLParam(r, "id"); id != "" {
+		i, _ := strconv.Atoi(id)
+		fmt.Fprintln(w, "id: ", i, GetPacketId(i))
+		return
+	}
 	return
+}
+
+func GetPacketId(id int) interface{} {
+	return Packets[id]
 }
