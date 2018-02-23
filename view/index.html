@@ -47,11 +47,6 @@ window.onload = function() {
 
 			sock.onmessage = function(e) {
 				console.log("message received: " + e.data);
-
-				var container = document.getElementById('packet');
-				var div = document.createElement('div');
-				div.textContent = e.data;
-				container.appendChild(div);
 			}
 		};
 
