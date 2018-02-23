@@ -29,8 +29,13 @@ var (
 	err             error
 	tiempoSalida    time.Duration = 2 * time.Second
 	handle          *pcap.Handle
-	Packets         []interface{}
+	Packets         []Packet
 )
+
+type Packet struct {
+	Tipo   string
+	Cuerpo interface{}
+}
 
 func main() {
 	flag.StringVar(&dispositivo, "d", "enp3s0", "Dispositivo que se va a utilizar para escanear.")
@@ -130,7 +135,11 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
 		fmt.Println("Protocol Ethernet >>>> ", string(data))
-		Packets = append(Packets, string(data))  //Agregamos al slice el packet en json
+		Packets = append(Packets,
+			Packet{
+				Tipo:   "ethernet",
+				Cuerpo: string(data),
+			})
 		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
 	}
 
@@ -144,7 +153,10 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
 		fmt.Println("Protocol UDP >>>> ", string(data))
-		Packets = append(Packets, string(data))  //add Packets -> slice
+		Packets = append(Packets, Packet{
+			Tipo:   "UDP",
+			Cuerpo: string(data),
+		})
 		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
 	}
 
@@ -156,7 +168,10 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
 		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
 		fmt.Println("Protocol tcp >>>> ", string(data))
-		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
+		Packets = append(Packets, Packet{
+			Tipo:   "TCP",
+			Cuerpo: string(data),
+		})
 		websocket.Message.Send(ws, string(data))
 	}
 
@@ -169,7 +184,10 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
 		fmt.Println("Protocol ipv4 >>>> ", string(data))
-		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
+		Packets = append(Packets, Packet{
+			Tipo:   "IPv4",
+			Cuerpo: string(data),
+		}) //Agregamos al slice el packet en json
 		websocket.Message.Send(ws, string(data))
 	}
 
@@ -178,12 +196,20 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 func GetPacket(w http.ResponseWriter, r *http.Request) {
 	if id := chi.URLParam(r, "id"); id != "" {
 		i, _ := strconv.Atoi(id)
-		fmt.Fprintln(w, "id: ", i, GetPacketId(i))
+		p := GetPacketId(i)
+		//enviamos los datos al cliente.
+		fmt.Fprintln(
+			w,
+			"id: ", i, NewLine,
+			"Packet: ", p.Cuerpo, NewLine,
+			"Tipo: ", p.Tipo, NewLine,
+		)
 		return
 	}
+	fmt.Fprintln(w, "Packet no existe.")
 	return
 }
 
-func GetPacketId(id int) interface{} {
+func GetPacketId(id int) Packet {
 	return Packets[id]
 }
