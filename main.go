@@ -43,6 +43,9 @@ func main() {
 	//api para eviar los packet
 	r.Route("/api", func(r chi.Router) {
 		r.Handle("/packet", websocket.Handler(Echo))
+		r.HandleFunc("/css", func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, "./view/css/bootstrap.min.css")
+		})
 	})
 
 	r.Get("/", Inicio) //Enviar el html and js
@@ -153,6 +156,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
 		//fmt.Println("Packet de Ipv4 >>>> ", *ipv4Packet)
 		//data := fmt.Sprint("Packet de Ipv4 >>>> ", *ipv4Packet)
+
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
 		fmt.Println("Protocol ipv4 >>>> ", string(data))
 		websocket.Message.Send(ws, string(data))
