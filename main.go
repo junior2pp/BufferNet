@@ -28,6 +28,7 @@ var (
 	err             error
 	tiempoSalida    time.Duration = 2 * time.Second
 	handle          *pcap.Handle
+	Packets         []interface{}
 )
 
 func main() {
@@ -36,14 +37,23 @@ func main() {
 
 	fmt.Println("Dispositivo: ", dispositivo)
 
+	Packets = append(Packets, "Datos--")
+	Packets = append(Packets, 25)
+	fmt.Println(Packets[0])
+
 	fmt.Println("localhost:8000")
 	r := chi.NewRouter()
 
 	// /api/packet
 	//api para eviar los packet
 	r.Route("/api", func(r chi.Router) {
-		r.Handle("/packet", websocket.Handler(Echo))
-		r.HandleFunc("/css", func(w http.ResponseWriter, r *http.Request) {
+
+		r.Route("/packet", func(r chi.Router) {
+			r.Handle("/", websocket.Handler(Echo)) // /api/packte/
+			r.Get("/{id}", GetPacket)              // /api/packet/12
+		})
+
+		r.Get("/css", func(w http.ResponseWriter, r *http.Request) { // /api/css
 			http.ServeFile(w, r, "./view/css/bootstrap.min.css")
 		})
 	})
@@ -123,6 +133,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
 		fmt.Println("Protocol Ethernet >>>> ", string(data))
+		Packets = append(Packets, string(data))  //Agregamos al slice el packet en json
 		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
 	}
 
@@ -136,6 +147,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 
 		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
 		fmt.Println("Protocol UDP >>>> ", string(data))
+		Packets = append(Packets, string(data))  //add Packets -> slice
 		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
 	}
 
@@ -162,4 +174,10 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		websocket.Message.Send(ws, string(data))
 	}
 
+}
+
+func GetPacket(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	fmt.Fprintln(w, id)
+	return
 }
