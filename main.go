@@ -32,11 +32,6 @@ var (
 	Packets         []Packet
 )
 
-type Packet struct {
-	Tipo   string
-	Cuerpo interface{}
-}
-
 func main() {
 	flag.StringVar(&dispositivo, "d", "enp3s0", "Dispositivo que se va a utilizar para escanear.")
 	flag.Parse()
@@ -130,65 +125,60 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	if ethernetLayer != nil {
 		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
 
-		//fmt.Println("packet de ethernet >>>> ", *ethernetPacket) //Imprimimos en la consola
-		//data := fmt.Sprint("packet ethernet >>>> ", *ethernetPacket)
-
 		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
-		fmt.Println("Protocol Ethernet >>>> ", string(data))
-		Packets = append(Packets,
-			Packet{
-				Tipo:   "ethernet",
-				Cuerpo: string(data),
-			})
-		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
+		//fmt.Println("Protocol Ethernet >>>> ", string(data))
+		p := Packet{
+			Tipo:   "ethernet",
+			Cuerpo: string(data),
+		}
+		d := fmt.Sprintln(p)
+		Packets = append(Packets, p)
+		websocket.Message.Send(ws, d[0:100]+"...") //Enviamos por el web socket
 	}
 
 	// Packet UDP
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
 		UDPPacket, _ := UDPLayer.(*layers.UDP) //Tranformamos
-
-		//fmt.Println("packet de UDP >>>> ", *UDPPacket) //Imprimimos
-		//data := fmt.Sprint("packet UDP >>>> ", *UDPPacket)
-
-		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
-		fmt.Println("Protocol UDP >>>> ", string(data))
-		Packets = append(Packets, Packet{
+		p := Packet{
 			Tipo:   "UDP",
-			Cuerpo: string(data),
-		})
-		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
+			Cuerpo: *UDPPacket,
+		}
+		data, _ := json.MarshalIndent(p, NewLine, Tab)
+
+		d := fmt.Sprintln(string(data))
+		Packets = append(Packets, p)
+		websocket.Message.Send(ws, d[0:100]+"...") //Enviamos por el web socket
 	}
 
 	// Protocol TCP
 	TCPLayer := packet.Layer(layers.LayerTypeTCP)
 	if TCPLayer != nil {
-		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
-		//fmt.Println("Packet de TCP >>>> ", *TCPPacket)
-		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
+		TCPPacket, _ := TCPLayer.(*layers.TCP)                  //Tranformamos
 		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
-		fmt.Println("Protocol tcp >>>> ", string(data))
-		Packets = append(Packets, Packet{
+		//fmt.Println("Protocol tcp >>>> ", string(data))
+		p := Packet{
 			Tipo:   "TCP",
 			Cuerpo: string(data),
-		})
-		websocket.Message.Send(ws, string(data))
+		}
+		d := fmt.Sprintln(p)
+		Packets = append(Packets, p)
+		websocket.Message.Send(ws, d[0:100]+"...")
 	}
 
 	// controla en Protocol ip-v4
 	ipv4Layer := packet.Layer(layers.LayerTypeIPv4)
 	if ipv4Layer != nil {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
-		//fmt.Println("Packet de Ipv4 >>>> ", *ipv4Packet)
-		//data := fmt.Sprint("Packet de Ipv4 >>>> ", *ipv4Packet)
-
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
-		fmt.Println("Protocol ipv4 >>>> ", string(data))
-		Packets = append(Packets, Packet{
+		//fmt.Println("Protocol ipv4 >>>> ", string(data))
+		p := Packet{
 			Tipo:   "IPv4",
 			Cuerpo: string(data),
-		}) //Agregamos al slice el packet en json
-		websocket.Message.Send(ws, string(data))
+		}
+		Packets = append(Packets, p)
+		d := fmt.Sprintln(p)
+		websocket.Message.Send(ws, d[0:100]+"...")
 	}
 
 }
