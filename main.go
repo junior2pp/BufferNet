@@ -143,12 +143,17 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	// Packet UDP
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
-
 		UDPPacket, _ := UDPLayer.(*layers.UDP) //Tranformamos
 		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
-		//fmt.Println("Protocol UDP >>>> ", string(data))
-		//Packets = append(Packets, string(data))  //add Packets -> slice
-		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
+
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++
+		Packets = append(Packets, pa)
+
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id)) //Enviamos por el web socket
 	}
 
 	// Protocol TCP
@@ -156,9 +161,13 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	if TCPLayer != nil {
 		TCPPacket, _ := TCPLayer.(*layers.TCP)                  //Tranformamos
 		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
-		//fmt.Println("Protocol tcp >>>> ", string(data))
-		//Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
-		websocket.Message.Send(ws, string(data))
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++
+		Packets = append(Packets, pa)
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id))
 	}
 
 	// controla en Protocol ip-v4
@@ -166,9 +175,13 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	if ipv4Layer != nil {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
-		//fmt.Println("Protocol ipv4 >>>> ", string(data))
-		//Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
-		websocket.Message.Send(ws, string(data))
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++
+		Packets = append(Packets, pa)
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id))
 	}
 
 }
@@ -176,7 +189,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 func GetPacket(w http.ResponseWriter, r *http.Request) {
 	if id := chi.URLParam(r, "id"); id != "" {
 		i, _ := strconv.Atoi(id)
-		fmt.Fprintln(w, "id: ", i, GetPacketId(i).Data)
+		fmt.Fprintln(w, GetPacketId(i).Data)
 		return
 	}
 	return
