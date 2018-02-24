@@ -124,10 +124,6 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
 	if ethernetLayer != nil {
 		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
-
-		//fmt.Println("packet de ethernet >>>> ", *ethernetPacket) //Imprimimos en la consola
-		//data := fmt.Sprint("packet ethernet >>>> ", *ethernetPacket)
-
 		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
 		fmt.Println("Protocol Ethernet >>>> ", string(data))
 		Packets = append(Packets, string(data))  //Agregamos al slice el packet en json
@@ -138,10 +134,6 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
 		UDPPacket, _ := UDPLayer.(*layers.UDP) //Tranformamos
-
-		//fmt.Println("packet de UDP >>>> ", *UDPPacket) //Imprimimos
-		//data := fmt.Sprint("packet UDP >>>> ", *UDPPacket)
-
 		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
 		fmt.Println("Protocol UDP >>>> ", string(data))
 		Packets = append(Packets, string(data))  //add Packets -> slice
@@ -151,9 +143,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	// Protocol TCP
 	TCPLayer := packet.Layer(layers.LayerTypeTCP)
 	if TCPLayer != nil {
-		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
-		//fmt.Println("Packet de TCP >>>> ", *TCPPacket)
-		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
+		TCPPacket, _ := TCPLayer.(*layers.TCP)                  //Tranformamos
 		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
 		fmt.Println("Protocol tcp >>>> ", string(data))
 		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
@@ -164,9 +154,6 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	ipv4Layer := packet.Layer(layers.LayerTypeIPv4)
 	if ipv4Layer != nil {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
-		//fmt.Println("Packet de Ipv4 >>>> ", *ipv4Packet)
-		//data := fmt.Sprint("Packet de Ipv4 >>>> ", *ipv4Packet)
-
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
 		fmt.Println("Protocol ipv4 >>>> ", string(data))
 		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
