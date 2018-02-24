@@ -1,39 +1,32 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  	<!-- Required meta tags -->
+    	<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="stylesheet" type="text/css" href="/api/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="/api/css/home.css">
-
-    <!-- Bootstrap CSS -->
-<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
-	-->
-
-    <title>bufferAnalizer</title>
-  </head>
+    	<title>bufferAnalizer</title>
+ </head>
   <body>
-
 	<div class="container">
 		<input id="message" type="text" value="Hello, world!">
 		<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
 	
-		<div class="row packets">
-			<div class="col-3 rojo">
+		<div class="row" id="packets">
+			<div class="col-3 mb-3">
 				<div class="p-2 azul">texto 1 </div>				
 			</div>
-			<div class="col-3 rojo">
+			<div class="col-3 mb-3">
 				<div class="p-2 azul">texto 2</div>
 			</div>		
-			<div class="col-3 rojo">
+			<div class="col-3 mb-3">
 				<div class="p-2 azul">texto 3</div>
 			</div>
-			<div class="col-3 rojo">
+			<div class="col-3 mb-3">
 				<div class="p-2 azul">texto 4</div>
 			</div>
 		</div>
-
 	</div>
 
 
@@ -41,30 +34,48 @@
 	var sock = null;
 	var wsuri = "ws://127.0.0.1:8000/api/packet";
 
-window.onload = function() {
+	window.onload = function() {
+				cuadros("tex");
+				cuadros("teclado");
+				cuadros("TCP");
 
-			console.log("onload");
+				console.log("onload");
 
-			sock = new WebSocket(wsuri);
+				sock = new WebSocket(wsuri);
 
-			sock.onopen = function() {
-				console.log("connected to " + wsuri);
-			}
+				sock.onopen = function() {
+					console.log("connected to " + wsuri);
+				}
 
-			sock.onclose = function(e) {
-				console.log("connection closed (" + e.code + ")");
-			}
+				sock.onclose = function(e) {
+					console.log("connection closed (" + e.code + ")");
+				}
 
-			sock.onmessage = function(e) {
-				console.log("message received: " + e.data);
-			}
-		};
+				sock.onmessage = function(e) {
+					console.log("message received: " + e.data);
+				}
+			};
 
 
-function send() {
-	var msg = document.getElementById('message').value;
-	sock.send(msg);
-};
+	function send() {
+		var msg = document.getElementById('message').value;
+		sock.send(msg);
+	};
+
+	function cuadros(texto) {
+		let packtes = document.getElementById('packets');
+		let div1 = document.createElement('div');
+		let div2 = document.createElement('div');
+
+		div1.className = "col-3 mb-3";
+		div2.className = "p-2 azul";
+		
+		div2.textContent = texto;
+		
+		div1.appendChild(div2);
+
+		packets.appendChild(div1);	//dibujamos
+	};
 
 </script>
   </body>
