@@ -4,7 +4,8 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="stylesheet" type="text/css"  href="/api/css">
+	<link rel="stylesheet" type="text/css" href="/api/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/api/css/home.css">
 
     <!-- Bootstrap CSS -->
 <!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
@@ -13,16 +14,25 @@
     <title>bufferAnalizer</title>
   </head>
   <body>
-	<h1>WebSocket bufferAnalizer</h1>
-	<form>
-	<p>
-		Mensaje: <input id="message" type="text" value="Hello, world!">
-	</p>
-	</form>
-	<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
-	<button type="button" class="btn btn-primary" onclick="stop();">Stop</button>
+
+	<div class="container">
+		<input id="message" type="text" value="Hello, world!">
+		<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
 	
-	<div id="packet">
+		<div class="row packets">
+			<div class="col-3 rojo">
+				<div class="p-2 azul">texto 1 </div>				
+			</div>
+			<div class="col-3 rojo">
+				<div class="p-2 azul">texto 2</div>
+			</div>		
+			<div class="col-3 rojo">
+				<div class="p-2 azul">texto 3</div>
+			</div>
+			<div class="col-3 rojo">
+				<div class="p-2 azul">texto 4</div>
+			</div>
+		</div>
 
 	</div>
 
@@ -55,10 +65,6 @@ function send() {
 	var msg = document.getElementById('message').value;
 	sock.send(msg);
 };
-
-function Stop() {
-	sock.send("stop");
-}
 
 </script>
   </body>

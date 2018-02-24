@@ -50,8 +50,9 @@ func main() {
 			r.Get("/{id}", GetPacket)              // /api/packet/12
 		})
 
-		r.Get("/css", func(w http.ResponseWriter, r *http.Request) { // /api/css
-			http.ServeFile(w, r, "./view/css/bootstrap.min.css")
+		r.Get("/css/{name}", func(w http.ResponseWriter, r *http.Request) { // /api/css
+			name := chi.URLParam(r, "name")
+			http.ServeFile(w, r, "./view/css/"+name)
 		})
 	})
 
