@@ -35,9 +35,6 @@
 	var wsuri = "ws://127.0.0.1:8000/api/packet";
 
 	window.onload = function() {
-				cuadros("tex");
-				cuadros("teclado");
-				cuadros("TCP");
 
 				console.log("onload");
 
@@ -53,6 +50,7 @@
 
 				sock.onmessage = function(e) {
 					console.log("message received: " + e.data);
+					cuadro(e.data);
 				}
 			};
 
@@ -62,7 +60,7 @@
 		sock.send(msg);
 	};
 
-	function cuadros(texto) {
+	function cuadro(texto) {
 		let packtes = document.getElementById('packets');
 		let div1 = document.createElement('div');
 		let div2 = document.createElement('div');
