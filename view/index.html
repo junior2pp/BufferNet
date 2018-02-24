@@ -14,18 +14,6 @@
 		<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
 	
 		<div class="row" id="packets">
-			<div class="col-3 mb-3">
-				<div class="p-2 azul">texto 1 </div>				
-			</div>
-			<div class="col-3 mb-3">
-				<div class="p-2 azul">texto 2</div>
-			</div>		
-			<div class="col-3 mb-3">
-				<div class="p-2 azul">texto 3</div>
-			</div>
-			<div class="col-3 mb-3">
-				<div class="p-2 azul">texto 4</div>
-			</div>
 		</div>
 	</div>
 
@@ -64,13 +52,17 @@
 		let packtes = document.getElementById('packets');
 		let div1 = document.createElement('div');
 		let div2 = document.createElement('div');
+		let a = document.createElement('a');
 
 		div1.className = "col-3 mb-3";
-		div2.className = "p-2 azul";
+		div2.className = "p-2 azul text-center";
 		
 		div2.textContent = texto;
+		a.href = "/api/packet/" + texto;
+		a.target = "_blank";
 		
-		div1.appendChild(div2);
+		div1.appendChild(a);
+		a.appendChild(div2);
 
 		packets.appendChild(div1);	//dibujamos
 	};
