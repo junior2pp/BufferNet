@@ -29,7 +29,8 @@ var (
 	err             error
 	tiempoSalida    time.Duration = 2 * time.Second
 	handle          *pcap.Handle
-	Packets         []interface{}
+	Packets         []Packet
+	Id              int
 )
 
 func main() {
@@ -124,20 +125,29 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	// packet de ethernet
 	ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
 	if ethernetLayer != nil {
+
 		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
+
 		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
-		fmt.Println("Protocol Ethernet >>>> ", string(data))
-		Packets = append(Packets, string(data))  //Agregamos al slice el packet en json
-		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
+
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++ //Incrementamos
+		Packets = append(Packets, pa)
+		fmt.Println(pa.Id)
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id)) //Enviamos por el web socket
 	}
 
 	// Packet UDP
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
+
 		UDPPacket, _ := UDPLayer.(*layers.UDP) //Tranformamos
 		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
-		fmt.Println("Protocol UDP >>>> ", string(data))
-		Packets = append(Packets, string(data))  //add Packets -> slice
+		//fmt.Println("Protocol UDP >>>> ", string(data))
+		//Packets = append(Packets, string(data))  //add Packets -> slice
 		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
 	}
 
@@ -146,8 +156,8 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	if TCPLayer != nil {
 		TCPPacket, _ := TCPLayer.(*layers.TCP)                  //Tranformamos
 		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
-		fmt.Println("Protocol tcp >>>> ", string(data))
-		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
+		//fmt.Println("Protocol tcp >>>> ", string(data))
+		//Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
 		websocket.Message.Send(ws, string(data))
 	}
 
@@ -156,8 +166,8 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	if ipv4Layer != nil {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
-		fmt.Println("Protocol ipv4 >>>> ", string(data))
-		Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
+		//fmt.Println("Protocol ipv4 >>>> ", string(data))
+		//Packets = append(Packets, string(data)) //Agregamos al slice el packet en json
 		websocket.Message.Send(ws, string(data))
 	}
 
@@ -166,12 +176,17 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 func GetPacket(w http.ResponseWriter, r *http.Request) {
 	if id := chi.URLParam(r, "id"); id != "" {
 		i, _ := strconv.Atoi(id)
-		fmt.Fprintln(w, "id: ", i, GetPacketId(i))
+		fmt.Fprintln(w, "id: ", i, GetPacketId(i).Data)
 		return
 	}
 	return
 }
 
-func GetPacketId(id int) interface{} {
+func GetPacketId(id int) Packet {
 	return Packets[id]
+}
+
+type Packet struct {
+	Id   int
+	Data interface{}
 }
