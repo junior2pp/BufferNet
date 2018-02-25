@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -27,16 +29,32 @@ var (
 	err             error
 	tiempoSalida    time.Duration = 2 * time.Second
 	handle          *pcap.Handle
+	Packets         []Packet
+	Id              int
 )
 
 func main() {
+	flag.StringVar(&dispositivo, "d", "enp3s0", "Dispositivo que se va a utilizar para escanear.")
+	flag.Parse()
+
+	fmt.Println("Dispositivo: ", dispositivo)
+
 	fmt.Println("localhost:8000")
 	r := chi.NewRouter()
 
 	// /api/packet
 	//api para eviar los packet
 	r.Route("/api", func(r chi.Router) {
-		r.Handle("/packet", websocket.Handler(Echo))
+
+		r.Route("/packet", func(r chi.Router) {
+			r.Handle("/", websocket.Handler(Echo)) // /api/packte/
+			r.Get("/{id}", GetPacket)              // /api/packet/12
+		})
+
+		r.Get("/css/{name}", func(w http.ResponseWriter, r *http.Request) { // /api/css
+			name := chi.URLParam(r, "name")
+			http.ServeFile(w, r, "./view/css/"+name)
+		})
 	})
 
 	r.Get("/", Inicio) //Enviar el html and js
@@ -96,10 +114,7 @@ func packageNet(ws *websocket.Conn) error {
 	//Utiliza handle para procesar todos los paquetes
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		//fmt.Println(packet)
 		SendPacket(packet, ws)
-		//data := fmt.Sprint(packet)
-		//websocket.Message.Send(ws, data) //enviamos los datos
 	}
 	return nil
 }
@@ -112,71 +127,79 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 	if ethernetLayer != nil {
 		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
 
-		//fmt.Println("packet de ethernet >>>> ", *ethernetPacket) //Imprimimos en la consola
-		//data := fmt.Sprint("packet ethernet >>>> ", *ethernetPacket)
-
 		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
-		fmt.Println("Protocol Ethernet >>>> ", string(data))
-		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
+
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++ //Incrementamos
+		Packets = append(Packets, pa)
+		fmt.Println(pa.Id)
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id)) //Enviamos por el web socket
 	}
 
 	// Packet UDP
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
 		UDPPacket, _ := UDPLayer.(*layers.UDP) //Tranformamos
-
-		//fmt.Println("packet de UDP >>>> ", *UDPPacket) //Imprimimos
-		//data := fmt.Sprint("packet UDP >>>> ", *UDPPacket)
-
 		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
-		fmt.Println("Protocol UDP >>>> ", string(data))
-		websocket.Message.Send(ws, string(data)) //Enviamos por el web socket
+
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++
+		Packets = append(Packets, pa)
+
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id)) //Enviamos por el web socket
 	}
 
 	// Protocol TCP
 	TCPLayer := packet.Layer(layers.LayerTypeTCP)
 	if TCPLayer != nil {
-		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
-		//fmt.Println("Packet de TCP >>>> ", *TCPPacket)
-		//data := fmt.Sprint("packets TCP >>>> ", *TCPPacket)
+		TCPPacket, _ := TCPLayer.(*layers.TCP)                  //Tranformamos
 		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
-		fmt.Println("Protocol tcp >>>> ", string(data))
-		websocket.Message.Send(ws, string(data))
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++
+		Packets = append(Packets, pa)
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id))
 	}
 
 	// controla en Protocol ip-v4
 	ipv4Layer := packet.Layer(layers.LayerTypeIPv4)
 	if ipv4Layer != nil {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
-		//fmt.Println("Packet de Ipv4 >>>> ", *ipv4Packet)
-		//data := fmt.Sprint("Packet de Ipv4 >>>> ", *ipv4Packet)
 		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
-		fmt.Println("Protocol ipv4 >>>> ", string(data))
-		websocket.Message.Send(ws, string(data))
+		pa := Packet{
+			Id:   Id,
+			Data: string(data),
+		}
+		Id++
+		Packets = append(Packets, pa)
+		websocket.Message.Send(ws, fmt.Sprintln(pa.Id))
 	}
 
-	icmpLayer := packet.Layer(layers.LayerTypeICMPv4)
-	if icmpLayer != nil {
-		icmpPacket, _ := icmpLayer.(*layers.ICMPv4)
-		fmt.Println("Icmp Packet >>>>")
-		fmt.Println(icmpPacket.TypeCode)
-		fmt.Println(icmpPacket.Checksum)
-		fmt.Println(icmpPacket.Id)
-		fmt.Println(icmpPacket.Seq)
+}
+
+func GetPacket(w http.ResponseWriter, r *http.Request) {
+	if id := chi.URLParam(r, "id"); id != "" {
+		i, _ := strconv.Atoi(id)
+		fmt.Fprintln(w, GetPacketId(i).Data)
+		return
 	}
+	fmt.Fprintln(w, "Packet no existe.")
+	return
+}
 
-	icmpLayer6 := packet.Layer(layers.LayerTypeICMPv6)
-	if icmpLayer6 != nil {
-		icmp6Packet, _ := icmpLayer6.(*layers.ICMPv6)
-		fmt.Println("ICMP V6 >>>>>>>")
-		fmt.Println(icmp6Packet.Checksum)
-		fmt.Println(icmp6Packet.)
-	}
+func GetPacketId(id int) Packet {
+	return Packets[id]
+}
 
-	ipv6Layer := packet.Layer(layers.LayerTypeIPv6)
-	if ipv64Layer != nil {
-
-	}
-
-
+type Packet struct {
+	Id   int
+	Data interface{}
 }
