@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	dispositivo     string = "enp3s0"
+	dispositivo     string = "ens33"
 	longitudCaptura int32  = 1024
 	modoPromiscuo   bool   = false
 	err             error
@@ -154,5 +154,29 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		fmt.Println("Protocol ipv4 >>>> ", string(data))
 		websocket.Message.Send(ws, string(data))
 	}
+
+	icmpLayer := packet.Layer(layers.LayerTypeICMPv4)
+	if icmpLayer != nil {
+		icmpPacket, _ := icmpLayer.(*layers.ICMPv4)
+		fmt.Println("Icmp Packet >>>>")
+		fmt.Println(icmpPacket.TypeCode)
+		fmt.Println(icmpPacket.Checksum)
+		fmt.Println(icmpPacket.Id)
+		fmt.Println(icmpPacket.Seq)
+	}
+
+	icmpLayer6 := packet.Layer(layers.LayerTypeICMPv6)
+	if icmpLayer6 != nil {
+		icmp6Packet, _ := icmpLayer6.(*layers.ICMPv6)
+		fmt.Println("ICMP V6 >>>>>>>")
+		fmt.Println(icmp6Packet.Checksum)
+		fmt.Println(icmp6Packet.)
+	}
+
+	ipv6Layer := packet.Layer(layers.LayerTypeIPv6)
+	if ipv64Layer != nil {
+
+	}
+
 
 }
