@@ -2,19 +2,39 @@
 <html lang="en">
   <head>
   	<!-- Required meta tags -->
-    	<meta charset="utf-8">
-    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="stylesheet" type="text/css" href="/api/css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="/api/css/home.css">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	    <link rel="stylesheet" href="/api/css/materialize.min.css">
+	    <link rel="stylesheet" type="text/css" href="/api/css/home.css">
     	<title>bufferAnalizer</title>
  </head>
   <body>
+
 	<div class="container">
 		<input id="message" type="text" value="Hello, world!">
 		<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
-	
+
 		<div class="row" id="packets">
 		</div>
+
+    <!-- Modal Trigger -->
+  <a class="waves-effect waves-light btn modal-trigger" data-id="10" href="#modal1">Modal</a>
+  <a class="waves-effect waves-light btn mo" data-id="1" >Modal 1</a>
+  <a class="waves-effect waves-light btn mo" data-id="2" >Modal 2</a>
+  <a class="waves-effect waves-light btn mo" data-id="3" >Modal 3</a>
+
+  <!-- Modal Structure -->
+  <div id="modal1" class="modal">
+    <div class="modal-content">
+      <h4>Modal Header</h4>
+      <p id="contenido">Texto </p>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+    </div>
+  </div>
+
+
 	</div>
 
 
@@ -56,17 +76,34 @@
 
 		div1.className = "col-3 mb-3";
 		div2.className = "p-2 azul text-center";
-		
+
 		div2.textContent = texto;
-		a.href = "/api/packet/" + texto;
-		a.target = "_blank";
-		
+		//a.href = "/api/packet/" + texto;
+    a.href = "#modal1";
+    a.className = "modal-trigger";
+		//a.target = "_blank";
+
 		div1.appendChild(a);
 		a.appendChild(div2);
 
 		packets.appendChild(div1);	//dibujamos
 	};
 
+</script>
+<script src="/api/js/jquery-3.3.1.min.js"></script>
+<script src="/api/js/materialize.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.modal').modal();
+// the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
+  $('.mo').click(function() {
+    //var elemento = $(this).text();
+
+    var elemento = $(this).data("id");
+    $('#contenido').text(elemento);
+    $('#modal1').modal('open');
+  });
+});
 </script>
   </body>
 </html>

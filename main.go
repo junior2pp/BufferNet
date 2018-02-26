@@ -51,15 +51,27 @@ func main() {
 			r.Get("/{id}", GetPacket)              // /api/packet/12
 		})
 
+		//Enviamos los archvios css
 		r.Get("/css/{name}", func(w http.ResponseWriter, r *http.Request) { // /api/css
 			name := chi.URLParam(r, "name")
 			http.ServeFile(w, r, "./view/css/"+name)
+		})
+
+		//Enviamos los archivos js
+		r.Get("/js/{name}", func(w http.ResponseWriter, r *http.Request) {
+			name := chi.URLParam(r, "name")
+			http.ServeFile(w, r, "./view/js/"+name)
+		})
+
+		//Enviamos los Fonts
+		r.Get("/fonts/roboto/{name}", func(w http.ResponseWriter, r *http.Request) {
+			name := chi.URLParam(r, "name")
+			http.ServeFile(w, r, "./view/fonts/roboto/"+name)
 		})
 	})
 
 	r.Get("/", Inicio) //Enviar el html and js
 	http.ListenAndServe(":8000", r)
-
 }
 
 //Pagina inicial
