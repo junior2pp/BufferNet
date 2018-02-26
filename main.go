@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	dispositivo     string = "enp3s0"
+	dispositivo     string = "ens33"
 	longitudCaptura int32  = 1024
 	modoPromiscuo   bool   = false
 	err             error
