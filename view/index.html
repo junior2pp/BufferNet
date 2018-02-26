@@ -14,30 +14,26 @@
 		<input id="message" type="text" value="Hello, world!">
 		<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
 
+    <!-- elemento donde se colocan los packets -->
 		<div class="row" id="packets">
 		</div>
 
-    <!-- Modal Trigger -->
-  <a class="waves-effect waves-light btn modal-trigger" data-id="10" href="#modal1">Modal</a>
-  <a class="waves-effect waves-light btn mo" data-id="1" >Modal 1</a>
-  <a class="waves-effect waves-light btn mo" data-id="2" >Modal 2</a>
-  <a class="waves-effect waves-light btn mo" data-id="3" >Modal 3</a>
-
-  <!-- Modal Structure -->
-  <div id="modal1" class="modal">
-    <div class="modal-content">
-      <h4>Modal Header</h4>
-      <p id="contenido">Texto </p>
+    <!-- Modal Structure -->
+    <div id="modal1" class="modal">
+      <div class="modal-content">
+        <h4>Modal Header</h4>
+        <p id="contenido">Texto </p>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+      </div>
     </div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
-    </div>
-  </div>
 
 
 	</div>
 
-
+  <script src="/api/js/jquery-3.3.1.min.js"></script>
+  <script src="/api/js/materialize.min.js"></script>
 <script type="text/javascript">
 	var sock = null;
 	var wsuri = "ws://127.0.0.1:8000/api/packet";
@@ -54,12 +50,14 @@
 
 				sock.onclose = function(e) {
 					console.log("connection closed (" + e.code + ")");
+          cuadrojq(e.code);
 				}
 
 				sock.onmessage = function(e) {
 					console.log("message received: " + e.data);
-					cuadro(e.data);
+          cuadrojq(e.data);
 				}
+
 			};
 
 
@@ -68,41 +66,39 @@
 		sock.send(msg);
 	};
 
-	function cuadro(texto) {
-		let packtes = document.getElementById('packets');
-		let div1 = document.createElement('div');
-		let div2 = document.createElement('div');
-		let a = document.createElement('a');
+	function cuadrojq(texto) {
+    var p = $('#packets');
+    p.append(
+      $('<a>', {
+        'text': texto,
+        'class': "waves-effect waves-light btn mAbrir",
+        'data-id': texto,
+      })
+    );
 
-		div1.className = "col-3 mb-3";
-		div2.className = "p-2 azul text-center";
-
-		div2.textContent = texto;
-		//a.href = "/api/packet/" + texto;
-    a.href = "#modal1";
-    a.className = "modal-trigger";
-		//a.target = "_blank";
-
-		div1.appendChild(a);
-		a.appendChild(div2);
-
-		packets.appendChild(div1);	//dibujamos
 	};
 
+
 </script>
-<script src="/api/js/jquery-3.3.1.min.js"></script>
-<script src="/api/js/materialize.min.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function(){
   $('.modal').modal();
-// the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
-  $('.mo').click(function() {
-    //var elemento = $(this).text();
 
-    var elemento = $(this).data("id");
-    $('#contenido').text(elemento);
+  //se ejecuta cuando se de click en el elemento
+  $(document).on('click', '.mAbrir', function () {
+    var elemento = $(this).data("id");  //id del packet
+    //Traemos el datos del servidor
+    $.ajax({
+      type: 'GET',
+      url: '/api/packet/' + elemento,
+      success: function(response) {
+        $('#contenido').text(response)
+      }
+    });
     $('#modal1').modal('open');
   });
+
 });
 </script>
   </body>

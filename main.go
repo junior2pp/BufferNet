@@ -148,7 +148,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		Id++ //Incrementamos
 		Packets = append(Packets, pa)
 		fmt.Println(pa.Id)
-		websocket.Message.Send(ws, fmt.Sprintln(pa.Id)) //Enviamos por el web socket
+		websocket.Message.Send(ws, fmt.Sprint(pa.Id)) //Enviamos por el web socket
 	}
 
 	// Packet UDP
@@ -164,7 +164,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		Id++
 		Packets = append(Packets, pa)
 
-		websocket.Message.Send(ws, fmt.Sprintln(pa.Id)) //Enviamos por el web socket
+		websocket.Message.Send(ws, fmt.Sprint(pa.Id)) //Enviamos por el web socket
 	}
 
 	// Protocol TCP
@@ -178,7 +178,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		}
 		Id++
 		Packets = append(Packets, pa)
-		websocket.Message.Send(ws, fmt.Sprintln(pa.Id))
+		websocket.Message.Send(ws, fmt.Sprint(pa.Id))
 	}
 
 	// controla en Protocol ip-v4
@@ -192,7 +192,7 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		}
 		Id++
 		Packets = append(Packets, pa)
-		websocket.Message.Send(ws, fmt.Sprintln(pa.Id))
+		websocket.Message.Send(ws, fmt.Sprint(pa.Id))
 	}
 
 }
