@@ -29,7 +29,7 @@ var (
 	err             error
 	tiempoSalida    time.Duration = 2 * time.Second
 	handle          *pcap.Handle
-	Packets         []Packet
+	Packets         []PacketSend
 	Id              int
 )
 
@@ -131,83 +131,110 @@ func packageNet(ws *websocket.Conn) error {
 	return nil
 }
 
+type PacketSend struct {
+	Id int
+	layers.Ethernet
+	layers.UDP
+	layers.TCP
+	layers.IPv4
+}
+
 //SendPacket Seleciona los diferentes packets y los envia por web socket
 func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
+	p1 := PacketSend{Id: Id}
 
 	// packet de ethernet
 	ethernetLayer := packet.Layer(layers.LayerTypeEthernet)
 	if ethernetLayer != nil {
 		ethernetPacket, _ := ethernetLayer.(*layers.Ethernet) //Tranformamos
+		p1.Ethernet = *ethernetPacket
+		/*
+			data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
 
-		data, _ := json.MarshalIndent(*ethernetPacket, NewLine, Tab)
-
-		pa := Packet{
-			Id:   Id,
-			Data: string(data),
-		}
-		Id++ //Incrementamos
-		Packets = append(Packets, pa)
-		fmt.Println(pa.Id)
-		websocket.Message.Send(ws, fmt.Sprint(pa.Id)) //Enviamos por el web socket
+			pa := Packet{
+				Id:   Id,
+				Data: string(data),
+			}
+			Id++ //Incrementamos
+			Packets = append(Packets, pa)
+			fmt.Println(pa.Id)
+			websocket.Message.Send(ws, fmt.Sprint(pa.Id)) //Enviamos por el web socket
+		*/
 	}
 
 	// Packet UDP
 	UDPLayer := packet.Layer(layers.LayerTypeUDP)
 	if UDPLayer != nil {
 		UDPPacket, _ := UDPLayer.(*layers.UDP) //Tranformamos
-		data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
 
-		pa := Packet{
-			Id:   Id,
-			Data: string(data),
-		}
-		Id++
-		Packets = append(Packets, pa)
+		p1.UDP = *UDPPacket
+		/*
+			data, _ := json.MarshalIndent(*UDPPacket, NewLine, Tab)
 
-		websocket.Message.Send(ws, fmt.Sprint(pa.Id)) //Enviamos por el web socket
+			pa := Packet{
+				Id:   Id,
+				Data: string(data),
+			}
+			Id++
+			Packets = append(Packets, pa)
+
+			websocket.Message.Send(ws, fmt.Sprint(pa.Id)) //Enviamos por el web socket
+		*/
+
 	}
 
 	// Protocol TCP
 	TCPLayer := packet.Layer(layers.LayerTypeTCP)
 	if TCPLayer != nil {
-		TCPPacket, _ := TCPLayer.(*layers.TCP)                  //Tranformamos
-		data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
-		pa := Packet{
-			Id:   Id,
-			Data: string(data),
-		}
-		Id++
-		Packets = append(Packets, pa)
-		websocket.Message.Send(ws, fmt.Sprint(pa.Id))
+		TCPPacket, _ := TCPLayer.(*layers.TCP) //Tranformamos
+		p1.TCP = *TCPPacket
+
+		/*
+			data, _ := json.MarshalIndent(*TCPPacket, NewLine, Tab) //Tranformamos en json
+			pa := Packet{
+				Id:   Id,
+				Data: string(data),
+			}
+			Id++
+			Packets = append(Packets, pa)
+			websocket.Message.Send(ws, fmt.Sprint(pa.Id))
+		*/
 	}
 
 	// controla en Protocol ip-v4
 	ipv4Layer := packet.Layer(layers.LayerTypeIPv4)
 	if ipv4Layer != nil {
 		ipv4Packet, _ := ipv4Layer.(*layers.IPv4)
-		data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
-		pa := Packet{
-			Id:   Id,
-			Data: string(data),
-		}
-		Id++
-		Packets = append(Packets, pa)
-		websocket.Message.Send(ws, fmt.Sprint(pa.Id))
+		p1.IPv4 = *ipv4Packet
+		/*
+			data, _ := json.MarshalIndent(*ipv4Packet, NewLine, Tab)
+			pa := Packet{
+				Id:   Id,
+				Data: string(data),
+			}
+			Id++
+			Packets = append(Packets, pa)
+			websocket.Message.Send(ws, fmt.Sprint(pa.Id))
+		*/
 	}
-
+	Packets = append(Packets, p1)
+	websocket.Message.Send(ws, fmt.Sprint(p1.Id))
+	Id++
+	return
 }
 
 func GetPacket(w http.ResponseWriter, r *http.Request) {
 	if id := chi.URLParam(r, "id"); id != "" {
 		i, _ := strconv.Atoi(id)
-		fmt.Fprintln(w, GetPacketId(i).Data)
+		d, _ := json.MarshalIndent(GetPacketId(i), NewLine, Tab)
+		fmt.Fprint(w, string(d))
 		return
 	}
 	fmt.Fprintln(w, "Packet no existe.")
 	return
 }
 
-func GetPacketId(id int) Packet {
+func GetPacketId(id int) PacketSend {
 	return Packets[id]
 }
 
