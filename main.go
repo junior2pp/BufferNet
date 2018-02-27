@@ -268,7 +268,6 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 		Id:    p1.Id,
 		Capas: fmt.Sprint(p1.Capas),
 	}
-	//websocket.Message.Send(ws, fmt.Sprint(prefi))
 	websocket.JSON.Send(ws, prefi)
 	Id++
 	return
