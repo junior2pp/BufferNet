@@ -14,7 +14,7 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
-	"golang.org/x/net/websocket"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -31,7 +31,14 @@ var (
 	handle          *pcap.Handle
 	Packets         []PacketSend
 	Id              int
+	clientes        = make(map[*websocket.Conn]bool) //Clientes conectados
+	broadcast       = make(chan Packet)
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 func main() {
 	flag.StringVar(&dispositivo, "d", "enp3s0", "Dispositivo que se va a utilizar para escanear.")
@@ -46,9 +53,11 @@ func main() {
 	//api para eviar los packet
 	r.Route("/api", func(r chi.Router) {
 
+		r.HandleFunc("/ws", handleConexion)
+
 		r.Route("/packet", func(r chi.Router) {
-			r.Handle("/", websocket.Handler(Echo)) // /api/packte/
-			r.Get("/{id}", GetPacket)              // /api/packet/12
+			//r.HandleFunc("/ws", handleConexion) // ws://localhost:8000/api/packte/ws
+			r.Get("/{id}", GetPacket) // /api/packet/12
 		})
 
 		//Enviamos los archvios css
@@ -88,29 +97,57 @@ func Inicio(w http.ResponseWriter, r *http.Request) {
 }
 
 //Echo maneja el web socket para enviar todos los packets
-func Echo(ws *websocket.Conn) {
-	var err error
+func handleConexion(w http.ResponseWriter, r *http.Request) {
+
+	//Actualizar la solicituid GET inicial a un webSocket
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer ws.Close()
+
+	//Registramos al cliente
+	clientes[ws] = true
 
 	for {
-		var reply string
-
-		if err = websocket.Message.Receive(ws, &reply); err != nil {
-			fmt.Println("Mensaje estado OK ")
-			break
+		messageType, p, err := ws.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
 		}
-
-		fmt.Println("Mensaje del cliente " + reply)
-
-		fmt.Println(reply)
-		websocket.Message.Send(ws, reply)
-
-		//Envio de packageNet
-		if err := packageNet(ws); err != nil {
-			break
-		}
+		fmt.Println(messageType, string(p))
 	}
+
+	/*
+		var err error
+
+		for {
+			var reply string
+
+			if err = websocket.Message.Receive(ws, &reply); err != nil {
+				fmt.Println("Mensaje estado OK ")
+				break
+			}
+
+			//Envio de packageNet
+			if err := packageNet(ws); err != nil {
+				break
+			}
+		}
+	*/
 	return
 }
+
+/*
+func handlePackets() {
+	for {
+
+		for cliente := range clientes {
+
+		}
+	}
+}
+*/
 
 //packetNet Escanea todos los packets de la red
 func packageNet(ws *websocket.Conn) error {
