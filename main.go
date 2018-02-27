@@ -33,6 +33,7 @@ var (
 	Id              int
 	clientes        = make(map[*websocket.Conn]bool) //Clientes conectados
 	broadcast       = make(chan Packet)
+	canalPacket     = make(chan gopacket.Packet)
 )
 
 var upgrader = websocket.Upgrader{
@@ -43,6 +44,9 @@ var upgrader = websocket.Upgrader{
 func main() {
 	flag.StringVar(&dispositivo, "d", "enp3s0", "Dispositivo que se va a utilizar para escanear.")
 	flag.Parse()
+
+	go packageNet()
+	go handlePackets()
 
 	fmt.Println("Dispositivo: ", dispositivo)
 
@@ -116,6 +120,7 @@ func handleConexion(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Println(messageType, string(p))
+
 	}
 
 	/*
@@ -138,24 +143,28 @@ func handleConexion(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-/*
 func handlePackets() {
 	for {
+		paquete := <-canalPacket
 
 		for cliente := range clientes {
-
+			err := cliente.WriteMessage(1, []byte(fmt.Sprint(paquete)))
+			if err != nil {
+				log.Printf("Error: %v", err)
+				cliente.Close()
+				delete(clientes, cliente)
+			}
 		}
 	}
 }
-*/
 
 //packetNet Escanea todos los packets de la red
-func packageNet(ws *websocket.Conn) error {
+func packageNet() {
 
 	// Abrimos la lectura
 	handle, err = pcap.OpenLive(dispositivo, longitudCaptura, modoPromiscuo, tiempoSalida)
 	if err != nil { //En el caso de existir algun error mostrarlo
-		return err
+		return
 	}
 	//Cerrar cuando se termine
 	defer handle.Close() //Luego de terminar de usar la función handle esta se cerrara
@@ -163,9 +172,9 @@ func packageNet(ws *websocket.Conn) error {
 	//Utiliza handle para procesar todos los paquetes
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		SendPacket(packet, ws)
+		canalPacket <- packet //enviamos el Packet por el canal
 	}
-	return nil
+	return
 }
 
 //SendPacket Seleciona los diferentes packets y los envia por web socket
