@@ -132,7 +132,8 @@ func packageNet(ws *websocket.Conn) error {
 }
 
 type PacketSend struct {
-	Id int
+	Id    int
+	Capas []string
 	layers.Ethernet
 	layers.UDP
 	layers.TCP
@@ -217,10 +218,28 @@ func SendPacket(packet gopacket.Packet, ws *websocket.Conn) {
 			websocket.Message.Send(ws, fmt.Sprint(pa.Id))
 		*/
 	}
+
+	var capas = make([]string, 0)
+	for _, layer := range packet.Layers() {
+		capas = append(capas, fmt.Sprint(layer.LayerType()))
+	}
+	p1.Capas = capas
+
+	fmt.Println(capas)
 	Packets = append(Packets, p1)
-	websocket.Message.Send(ws, fmt.Sprint(p1.Id))
+	prefi := Pre{
+		Id:    p1.Id,
+		Capas: fmt.Sprint(p1.Capas),
+	}
+	//websocket.Message.Send(ws, fmt.Sprint(prefi))
+	websocket.JSON.Send(ws, prefi)
 	Id++
 	return
+}
+
+type Pre struct {
+	Id    int
+	Capas string
 }
 
 func GetPacket(w http.ResponseWriter, r *http.Request) {

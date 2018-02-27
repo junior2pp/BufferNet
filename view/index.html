@@ -50,12 +50,11 @@
 
 				sock.onclose = function(e) {
 					console.log("connection closed (" + e.code + ")");
-          cuadrojq(e.code);
 				}
 
 				sock.onmessage = function(e) {
-					console.log("message received: " + e.data);
-          cuadrojq(e.data);
+          var d = JSON.parse(e.data)
+          cuadro(d.Id, d.Capas);
 				}
 
 			};
@@ -66,13 +65,13 @@
 		sock.send(msg);
 	};
 
-	function cuadrojq(texto) {
+	function cuadro(id, texto) {
     var p = $('#packets');
     p.append(
       $('<a>', {
         'text': texto,
         'class': "waves-effect waves-light btn mAbrir",
-        'data-id': texto,
+        'data-id': id,
       })
     );
 
