@@ -36,7 +36,7 @@
   <script src="/api/js/materialize.min.js"></script>
 <script type="text/javascript">
 	var sock = null;
-	var wsuri = "ws://127.0.0.1:8000/api/packet";
+	var wsuri = 'ws://' + window.location.host + '/api/ws';
 
 	window.onload = function() {
 
@@ -46,16 +46,17 @@
 
 				sock.onopen = function() {
 					console.log("connected to " + wsuri);
+					alert("Conectados");
 				}
 
 				sock.onclose = function(e) {
 					console.log("connection closed (" + e.code + ")");
-          cuadrojq(e.code);
+          				cuadrojq(e.code);
 				}
 
 				sock.onmessage = function(e) {
 					console.log("message received: " + e.data);
-          cuadrojq(e.data);
+					cuadrojq(e.data);
 				}
 
 			};
