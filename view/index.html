@@ -63,8 +63,9 @@
 				}
 
 				sock.onmessage = function(e) {
-          var d = JSON.parse(e.data)
-          cuadro(d.Id, d.Capas);
+         			 	var d = JSON.parse(e.data)
+          				cuadro(d.Id, d.Capas);
+          				console.log(d.Id);
 				}
 
 			};
@@ -82,12 +83,12 @@
 					'class': "col s6 l3"
 				});
 		var card = $('<div>', {
-					'class': "card-panel hoverable mAbrir"
+					'class': "card-panel hoverable mAbrir",
+					'data-id': id
 				});
 		var cont = $('<span>', {
 					'class': "truncate blue-text text-darken-2",
 					'text': texto,
-					'data-id': id,
 				});
 		
 		col.append(card.append(cont))
@@ -100,20 +101,22 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
-  $('.modal').modal();
+  	
+  	$('.modal').modal();
 
-  //se ejecuta cuando se de click en el elemento
-  $(document).on('click', '.mAbrir', function () {
-    var elemento = $(this).data("id");  //id del packet
-    //Traemos el datos del servidor
-    $.ajax({
-      type: 'GET',
-      url: '/api/packet/' + elemento,
-      success: function(response) {
-        $('#contenido').text(response)
-      }
-    });
-    $('#modal1').modal('open');
+	//se ejecuta cuando se de click en el elemento
+  	$(document).on('click', '.mAbrir', function () {
+  	
+    		var elemento = $(this).data("id");  //id del packet
+    		//Traemos el datos del servidor
+    		$.ajax({
+     			type: 'GET',
+      			url: '/api/packet/' + elemento,
+      			success: function(response) {
+        				$('#contenido').text(response)
+      			}
+    	});
+    	$('#modal1').modal('open');
   });
 
 });
