@@ -15,6 +15,11 @@ flags
 
 -d	Establese el dispositivo de red 
 
-ejemplo 
+ejemplo de ejecucion y establecer el dispositivo
 
-# go run main.go -d enp3s0
+	# go run main.go -d enp3s0
+
+Run cmake and make
+
+    $ cmake ../root
+    $ make -j8
