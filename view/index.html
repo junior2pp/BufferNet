@@ -2,38 +2,48 @@
 <html lang="en">
   <head>
   	<!-- Required meta tags -->
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	    <link rel="stylesheet" href="/api/css/materialize.min.css">
-	    <link rel="stylesheet" type="text/css" href="/api/css/home.css">
-    	<title>bufferAnalizer</title>
+      	<meta charset="utf-8">
+      	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      	<!-- CSS -->
+	<link rel="stylesheet" href="/api/css/materialize.min.css">
+	<link rel="stylesheet" type="text/css" href="/api/css/home.css">
+	<link rel="stylesheet" type="text/css" href="/api/css/style.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<title>bufferAnalizer</title>
  </head>
   <body>
-
+	
+	<!-- Barra de navegacion -->
+	<nav class="white" role="navigation">
+		<div class="nav-wrapper container">
+			<a href="#" class="brand-logo center">Scan-Net</a>					
+		</div>
+	</nav>
+	
 	<div class="container">
-		<input id="message" type="text" value="Hello, world!">
+		<br><br>
 		<button type="button" class="btn btn-primary" onclick="send();">Iniciar Captura</button>
 
-    <!-- elemento donde se colocan los packets -->
+    		<!-- elemento donde se colocan los packets -->
 		<div class="row" id="packets">
+		
 		</div>
 
-    <!-- Modal Structure -->
-    <div id="modal1" class="modal">
-      <div class="modal-content">
-        <h4>Modal Header</h4>
-        <p id="contenido">Texto </p>
-      </div>
-      <div class="modal-footer">
-        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
-      </div>
-    </div>
-
-
+    		<!-- Modal Structure -->
+    			<div id="modal1" class="modal">
+      				<div class="modal-content">
+        					<h4>Modal Header</h4>
+       	 				<p id="contenido">Texto </p>
+     				</div>
+      				<div class="modal-footer">
+        					<a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+      				</div>
+    			</div>
 	</div>
 
   <script src="/api/js/jquery-3.3.1.min.js"></script>
   <script src="/api/js/materialize.min.js"></script>
+  <script src="/api/js/init.js"></script>
 <script type="text/javascript">
 	var sock = null;
 	var wsuri = 'ws://' + window.location.host + '/api/ws';
@@ -61,20 +71,28 @@
 
 
 	function send() {
-		var msg = document.getElementById('message').value;
+		var msg = "Iniciar Cactura";
 		sock.send(msg);
 	};
 
 	function cuadro(id, texto) {
-    var p = $('#packets');
-    p.append(
-      $('<a>', {
-        'text': texto,
-        'class': "waves-effect waves-light btn mAbrir",
-        'data-id': id,
-      })
-    );
-
+		var p = $('#packets');
+		
+		var col = $('<div>', {
+					'class': "col s6 l3"
+				});
+		var card = $('<div>', {
+					'class': "card-panel hoverable mAbrir"
+				});
+		var cont = $('<span>', {
+					'class': "truncate blue-text text-darken-2",
+					'text': texto,
+					'data-id': id,
+				});
+		
+		col.append(card.append(cont))
+		p.append(col)
+   	
 	};
 
 

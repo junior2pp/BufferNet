@@ -92,13 +92,14 @@ func Echo(ws *websocket.Conn) {
 	var err error
 
 	for {
-		var reply string
+		var msg string
 
-		if err = websocket.Message.Receive(ws, &reply); err != nil {
-			fmt.Println("Mensaje estado OK ")
+		if err = websocket.Message.Receive(ws, &msg); err != nil {
+			fmt.Println("Conexion Cerrada ", err)
 			break
 		}
-		fmt.Println(reply);
+		fmt.Println("Mensaje: ", msg)
+	
 
 		//Envio de packageNet
 		if err := packageNet(ws); err != nil {
