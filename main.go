@@ -177,15 +177,15 @@ func GetPacket(w http.ResponseWriter, r *http.Request) {
 
 		for _, layerType := range foundLayerTypes {
 			if layerType == layers.LayerTypeEthernet {
-				fmt.Fprintln(w, "<br>", "LayerTypeEthernet")
-				fmt.Fprintln(w, "<br>", "DstMAC: ", ethLayer.DstMAC)
+				fmt.Fprintln(w, "<br>", `<span class="blue-text">LayerTypeEthernet</span>`)
+				fmt.Fprintln(w, "<br>", "<span>DstMAC: ", ethLayer.DstMAC)
 			}
 			if layerType == layers.LayerTypeIPv4 {
-				fmt.Fprintln(w, "<br>", "LayerTypeIPv4")
+				fmt.Fprintln(w, "<br>", `<span class="blue-text">LayerTypeIPv4</span>`)
 				fmt.Fprintln(w, "<br>", "IPv4: ", ipLayer.SrcIP, "->", ipLayer.DstIP)
 			}
 			if layerType == layers.LayerTypeTCP {
-				fmt.Fprintln(w, "<br>", "LayerTypeTCP")
+				fmt.Fprintln(w, "<br>", `<span class="blue-text">LayerTypeTCP</span>`)
 				fmt.Fprintln(w, "<br>","TCP Port: ", tcpLayer.SrcPort, "->", tcpLayer.DstPort)
 				fmt.Fprintln(w, "<br>","TCP SYN:", tcpLayer.SYN, " | ACK:", tcpLayer.ACK)
 				fmt.Fprintln(w, "<br>", tcpLayer.Window)
